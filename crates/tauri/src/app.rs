@@ -1122,8 +1122,11 @@ impl<R: Runtime> App<R> {
   fn register_core_plugins(&self) -> crate::Result<()> {
     self.handle.plugin(crate::path::plugin::init())?;
     self.handle.plugin(crate::event::plugin::init(self))?;
+    #[cfg(not(feature = "native-activity"))]
     self.handle.plugin(crate::window::plugin::init())?;
+    #[cfg(not(feature = "native-activity"))]
     self.handle.plugin(crate::webview::plugin::init())?;
+    #[cfg(not(feature = "native-activity"))]
     self.handle.plugin(crate::app::plugin::init())?;
     self.handle.plugin(crate::resources::plugin::init())?;
     self.handle.plugin(crate::image::plugin::init())?;
@@ -2213,7 +2216,7 @@ tauri::Builder::default()
     runtime.set_device_event_filter(self.device_event_filter);
 
     let runtime_handle = runtime.handle();
-
+    
     #[allow(unused_mut)]
     let mut app = App {
       runtime: Some(runtime),

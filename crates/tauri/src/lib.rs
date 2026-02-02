@@ -123,6 +123,8 @@ pub type Wry = tauri_runtime_wry::Wry<EventLoopMessage>;
 #[cfg(feature = "wry")]
 #[cfg_attr(docsrs, doc(cfg(feature = "wry")))]
 pub type WryHandle = tauri_runtime_wry::WryHandle<EventLoopMessage>;
+#[cfg(all(feature = "wry", target_os = "android"))]
+pub use tauri_runtime_wry::set_android_app;
 
 #[cfg(all(feature = "wry", target_os = "android"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "wry", target_os = "android"))))]

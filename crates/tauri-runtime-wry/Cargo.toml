@@ -27,6 +27,7 @@ http = "1"
 url = "2"
 tracing = { version = "0.1", optional = true }
 log = "0.4.21"
+android-activity = "0.6.0"
 
 [target."cfg(windows)".dependencies]
 webview2-com = "0.38"
@@ -75,3 +76,4 @@ tracing = ["dep:tracing", "wry/tracing"]
 macos-proxy = ["wry/mac-proxy"]
 unstable = []
 common-controls-v6 = []
+native-activity = []

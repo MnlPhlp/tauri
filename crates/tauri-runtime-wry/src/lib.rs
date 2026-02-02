@@ -2600,6 +2600,14 @@ impl<T: UserEvent> WryHandle<T> {
   }
 }
 
+#[cfg(target_os = "android")]
+static ANDROID_APP: std::sync::OnceLock<android_activity::AndroidApp> = std::sync::OnceLock::new();
+
+#[cfg(target_os = "android")]
+pub fn set_android_app(app: android_activity::AndroidApp) {
+  let _ = ANDROID_APP.set(app);
+}
+
 impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
   type Runtime = Wry<T>;
 
@@ -2739,6 +2747,16 @@ impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
   where
     F: FnOnce(&mut jni::JNIEnv, &jni::objects::JObject, &jni::objects::JObject) + Send + 'static,
   {
+    #[cfg(feature = "native-activity")]
+    {
+      let app = ANDROID_APP.get().expect("Android app not initialized");
+      let jvm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr().cast()) }.unwrap();
+      let mut env = jvm.attach_current_thread().unwrap();
+      let activity = unsafe { jni::objects::JObject::from_raw(app.activity_as_ptr().cast()) };
+      let null = jni::objects::JObject::null();
+      f(&mut env, &activity, &null);
+    }
+    #[cfg(not(feature = "native-activity"))]
     dispatch(f)
   }
 
@@ -2814,6 +2832,9 @@ impl<T: UserEvent> Wry<T> {
       next_webview_id: Default::default(),
       next_window_event_id: Default::default(),
       next_webview_event_id: Default::default(),
+      #[cfg(feature = "native-activity")]
+      webview_runtime_installed: false,
+      #[cfg(not(feature = "native-activity"))]
       webview_runtime_installed: wry::webview_version().is_ok(),
     };
 
