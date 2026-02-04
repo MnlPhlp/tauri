@@ -28,9 +28,6 @@ url = "2"
 tracing = { version = "0.1", optional = true }
 log = "0.4.21"
 
-[target."cfg(android)".dependencies]
-android-activity = "0.6.0"
-
 [target."cfg(windows)".dependencies]
 webview2-com = "0.38"
 softbuffer = { version = "0.4", default-features = false }
@@ -62,6 +59,7 @@ objc2-app-kit = { version = "0.3", features = [
 
 [target."cfg(target_os = \"android\")".dependencies]
 jni = "0.21"
+android-activity = "0.6.0"
 
 [features]
 default = ["x11"]
