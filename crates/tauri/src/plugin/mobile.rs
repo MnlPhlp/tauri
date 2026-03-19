@@ -214,7 +214,6 @@ impl<R: Runtime, C: DeserializeOwned> PluginApi<R, C> {
       plugin_class: String,
       plugin_config: &serde_json::Value,
     ) -> Result<(), JniError> {
-      println!("Line {}, File {}", line!(), file!());
       // instantiate plugin
       let plugin_class = runtime_handle.find_class(env, activity, plugin_class)?;
       let plugin = env.new_object(
@@ -222,7 +221,6 @@ impl<R: Runtime, C: DeserializeOwned> PluginApi<R, C> {
         "(Landroid/app/Activity;)V",
         &[activity.into()],
       )?;
-      println!("Line {}, File {}", line!(), file!());
 
       // load plugin
 

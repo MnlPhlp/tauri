@@ -1121,12 +1121,19 @@ impl<R: Runtime> App<R> {
     tracing::instrument(name = "app::core_plugins::register")
   )]
   fn register_core_plugins(&self) -> crate::Result<()> {
+    #[cfg(not(feature = "no-webview"))]
     self.handle.plugin(crate::path::plugin::init())?;
+    println!("line:{}", line!());
     self.handle.plugin(crate::event::plugin::init(self))?;
+    #[cfg(not(feature = "no-webview"))]
     self.handle.plugin(crate::window::plugin::init())?;
+    #[cfg(not(feature = "no-webview"))]
     self.handle.plugin(crate::webview::plugin::init())?;
+    #[cfg(not(feature = "no-webview"))]
     self.handle.plugin(crate::app::plugin::init())?;
+    println!("line:{}", line!());
     self.handle.plugin(crate::resources::plugin::init())?;
+    println!("line:{}", line!());
     self.handle.plugin(crate::image::plugin::init())?;
     #[cfg(desktop)]
     self.handle.plugin(crate::menu::plugin::init())?;

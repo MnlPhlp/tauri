@@ -2754,17 +2754,6 @@ impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
       let mut env = jvm.attach_current_thread().unwrap();
       let activity = unsafe { jni::objects::JObject::from_raw(app.activity_as_ptr().cast()) };
       let null = jni::objects::JObject::null();
-      // call the getCompatActivity method to get the correct activity from the TauriNativeActivity
-      let activity = env
-        .call_method(
-          activity,
-          "getCompatActivity",
-          "()Landroid/app/Activity;",
-          &[],
-        )
-        .unwrap()
-        .l()
-        .unwrap();
       f(&mut env, &activity, &null);
     }
     #[cfg(not(feature = "no-webview"))]
