@@ -221,6 +221,7 @@ image-png = ["image/png"]
 macos-proxy = ["tauri-runtime-wry?/macos-proxy"]
 dynamic-acl = []
 specta = ["dep:specta"]
+no-webview = ["tauri-runtime-wry?/no-webview"]
 
 [[example]]
 name = "commands"

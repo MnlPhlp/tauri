@@ -2600,6 +2600,14 @@ impl<T: UserEvent> WryHandle<T> {
   }
 }
 
+#[cfg(all(target_os = "android", feature = "no-webview"))]
+static ANDROID_APP: std::sync::OnceLock<android_activity::AndroidApp> = std::sync::OnceLock::new();
+
+#[cfg(all(target_os = "android", feature = "no-webview"))]
+pub fn set_android_app(app: android_activity::AndroidApp) {
+  let _ = ANDROID_APP.set(app);
+}
+
 impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
   type Runtime = Wry<T>;
 
@@ -2739,6 +2747,27 @@ impl<T: UserEvent> RuntimeHandle<T> for WryHandle<T> {
   where
     F: FnOnce(&mut jni::JNIEnv, &jni::objects::JObject, &jni::objects::JObject) + Send + 'static,
   {
+    #[cfg(feature = "no-webview")]
+    {
+      let app = ANDROID_APP.get().expect("Android app not initialized");
+      let jvm = unsafe { jni::JavaVM::from_raw(app.vm_as_ptr().cast()) }.unwrap();
+      let mut env = jvm.attach_current_thread().unwrap();
+      let activity = unsafe { jni::objects::JObject::from_raw(app.activity_as_ptr().cast()) };
+      let null = jni::objects::JObject::null();
+      // call the getCompatActivity method to get the correct activity from the TauriNativeActivity
+      let activity = env
+        .call_method(
+          activity,
+          "getCompatActivity",
+          "()Landroid/app/Activity;",
+          &[],
+        )
+        .unwrap()
+        .l()
+        .unwrap();
+      f(&mut env, &activity, &null);
+    }
+    #[cfg(not(feature = "no-webview"))]
     dispatch(f)
   }
 
@@ -2814,7 +2843,12 @@ impl<T: UserEvent> Wry<T> {
       next_webview_id: Default::default(),
       next_window_event_id: Default::default(),
       next_webview_event_id: Default::default(),
-      webview_runtime_installed: wry::webview_version().is_ok(),
+      webview_runtime_installed: if cfg!(feature = "no-webview") {
+        log::warn!("The `no-webview` feature is enabled, so webviews will not work.");
+        false
+      } else {
+        wry::webview_version().is_ok()
+      },
     };
 
     Ok(Self {
